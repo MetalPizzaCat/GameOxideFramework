@@ -132,13 +132,12 @@ impl Settings {
         if let Some(fullscreen) = self.values.get("fullscreen_type") {
             let fullscreen_mode = match fullscreen {
                 0 => FullscreenType::Off,
-                2 => FullscreenType::True,
-                1 => FullscreenType::Desktop,
+                1 => FullscreenType::True,
+                2 => FullscreenType::Desktop,
                 _ => FullscreenType::Off,
             };
             if let Some(res) = self.values.get("resolution") {
                 let temp = info.resolution_values[*res as usize];
-                println!("Changing window size to {}:{}", temp.0, temp.1);
                 if matches!(fullscreen_mode, FullscreenType::Off) {
                     canvas
                         .window_mut()
@@ -148,17 +147,10 @@ impl Settings {
                         .set_logical_size(800, 600)
                         .map_err(|e| e.to_string())?;
                 } else {
-                    /*canvas
-                    .set_logical_size(temp.0, temp.1)
-                    .map_err(|e| e.to_string())?;*/
                     canvas
                         .window_mut()
                         .set_size(temp.0, temp.1)
                         .map_err(|e| e.to_string())?;
-                    /*canvas.set_scale(
-                         (800 as f32 / temp.0 as f32),
-                        (600 as f32 / temp.1 as f32),
-                    )?;*/
                 }
             }
             canvas.window_mut().set_fullscreen(fullscreen_mode)?;
@@ -173,11 +165,9 @@ impl Default for Settings {
         Self {
             values_changed: true,
             values: HashMap::from([
-                ("animation_speed".to_owned(), 1),
-                ("play_animations".to_owned(), 1),
+                //These are default settings that should be shared between projects
+                ("resolution".to_owned(), 0),
                 ("fullscreen".to_owned(), 0),
-                ("win_size_x".to_owned(), 800),
-                ("win_size_y".to_owned(), 600),
             ]),
         }
     }
