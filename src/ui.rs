@@ -62,8 +62,11 @@ impl<'a> System<'a> for ButtonUpdateSystem {
         ReadStorage<'a, Button>,
         Read<'a, MouseData>,
     );
-    fn run(&mut self, (rect, pos, mut sprite, mut text,mut color, button, mouse): Self::SystemData) {
-        for (rect, pos,  sprite,text,color, button) in (
+    fn run(
+        &mut self,
+        (rect, pos, mut sprite, mut text, mut color, button, mouse): Self::SystemData,
+    ) {
+        for (rect, pos, sprite, text, color, button) in (
             &rect,
             &pos,
             (&mut sprite).maybe(),
@@ -138,6 +141,7 @@ pub fn make_button_base(
     world: &mut World,
     location: Vector2<i32>,
     size: Vector2<i32>,
+    button_info: Option<Button>,
     color: sdl2::pixels::Color,
     layer: RenderLayers,
 ) -> EntityBuilder {
@@ -151,7 +155,30 @@ pub fn make_button_base(
             width: size.x,
             height: size.y,
         })
-        .with(Button::default())
+        .with(button_info.unwrap_or_default())
         .with(Colored { color: color })
         .with(Renderable::new(true, layer as u32))
+}
+
+///Returns requested component attached to the first entity that has rectangle and position that overlap given point.
+/// 
+/// Useful for implementing button presses
+pub fn get_overlapping_component_with_type<'a, ButtonType: specs::Component + Clone>(
+    point: Vector2<i32>,
+    (pos, rect, btn_type): (
+        ReadStorage<'a, Position>,
+        ReadStorage<'a, Rectangle>,
+        ReadStorage<'a, ButtonType>,
+    ),
+) -> Option<ButtonType> {
+    for (pos, rect, _type) in (&pos, &rect, &btn_type).join() {
+        if point.x >= pos.x
+            && point.y >= pos.y
+            && point.x <= pos.x + rect.width
+            && point.y <= pos.y + rect.height
+        {
+            return Some(_type.clone());
+        }
+    }
+    None
 }
