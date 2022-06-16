@@ -1,21 +1,25 @@
 use crate::components::*;
 use crate::game::Game;
 use crate::texture_manager::TextureManager;
-use specs::ReadStorage;
+use specs::{ReadStorage, World};
 
 pub type Canvas = sdl2::render::Canvas<sdl2::video::Window>;
 
+///Data used for rendering textures
 pub type TexturedRenderData<'a> = (
     ReadStorage<'a, Position>,
     ReadStorage<'a, Sprite>,
     ReadStorage<'a, Renderable>,
 );
+///Data used for rendering text
 pub type TextRender<'a> = (
     ReadStorage<'a, Position>,
     ReadStorage<'a, Text>,
     ReadStorage<'a, Renderable>,
 );
 
+///Function that only renders textures
+/// This relies on texture already being loaded into texture manager
 pub fn render_textures(
     canvas: &mut Canvas,
     texture_manager: &TextureManager,
@@ -24,7 +28,7 @@ pub fn render_textures(
 ) -> Result<(), String> {
     use specs::Join;
     for (pos, sprite, rend) in (&pos, &sprite, &renderable).join() {
-        if !sprite.visible || !rend.visible || (game.active_layers & rend.layer ==0) {
+        if !sprite.visible || !rend.visible || (game.active_layers & rend.layer == 0) {
             continue;
         }
         canvas.copy(
@@ -38,7 +42,9 @@ pub fn render_textures(
     Ok(())
 }
 
-pub fn render<'a>(
+///Draws all of the rectangle borders, for all objects that have Rectangle component attached
+/// This is meant only for debug purposes
+pub fn render_rect<'a>(
     canvas: &mut Canvas,
     (pos, rect, renderable): (
         ReadStorage<'a, Position>,
@@ -50,7 +56,7 @@ pub fn render<'a>(
     use specs::Join;
     canvas.set_draw_color(sdl2::pixels::Color::RGB(255, 0, 0));
     for (pos, rect, rend) in (&pos, &rect, &renderable).join() {
-        if !rend.visible  || (game.active_layers & rend.layer ==0) {
+        if !rend.visible || (game.active_layers & rend.layer == 0) {
             continue;
         }
         canvas.draw_rect(sdl2::rect::Rect::new(
@@ -63,6 +69,8 @@ pub fn render<'a>(
     Ok(())
 }
 
+///Draws all rectangles as filled
+/// This needs rectangle, position,color and renderable components
 pub fn render_fill<'a>(
     canvas: &mut Canvas,
     (pos, rect, col, renderable): (
@@ -75,7 +83,7 @@ pub fn render_fill<'a>(
 ) -> Result<(), String> {
     use specs::Join;
     for (pos, rect, col, rend) in (&pos, &rect, &col, &renderable).join() {
-        if !rend.visible  || (game.active_layers & rend.layer ==0) {
+        if !rend.visible || (game.active_layers & rend.layer == 0) {
             continue;
         }
         canvas.set_draw_color(col.color);
@@ -89,6 +97,8 @@ pub fn render_fill<'a>(
     Ok(())
 }
 
+///Draws all of the text
+/// Note that text texture will be generated each frame
 pub fn render_text(
     canvas: &mut Canvas,
     font: &sdl2::ttf::Font,
@@ -98,7 +108,7 @@ pub fn render_text(
 ) -> Result<(), String> {
     use specs::Join;
     for (pos, text, rend) in (&pos, &text, &renderable).join() {
-        if !text.visible || !rend.visible  || (game.active_layers & rend.layer ==0) {
+        if !text.visible || !rend.visible || (game.active_layers & rend.layer == 0) {
             continue;
         }
         let surface = font

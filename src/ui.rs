@@ -20,16 +20,22 @@ pub struct DropdownMenuParent {
     pub unwrapped: bool,
 }
 
-#[derive(Component, Default)]
-#[storage(NullStorage)]
-pub struct MenuButton;
+#[derive(Clone, Debug, PartialEq, Component, Default)]
+#[storage(VecStorage)]
+pub struct Button {
+    pub hovered_over: bool,
+}
 
+pub fn register_ui_components(world : &mut World){
+    world.register::<DropdownMenuButton>();
+    world.register::<DropdownMenuParent>();
+    world.register::<Button>();
+}
 ///Creates base for button that can be displayed on the screen
 pub fn make_button_base(
     world: &mut World,
     location: Vector2<i32>,
     size: Vector2<i32>,
-    text: String,
     color: sdl2::pixels::Color,
     layer: RenderLayers,
 ) -> EntityBuilder {
@@ -39,17 +45,10 @@ pub fn make_button_base(
             x: location.x,
             y: location.y,
         })
-        .with(Text {
-            text: text,
-            color: sdl2::pixels::Color::WHITE,
-            visible: true,
-            offset: Vector2::new(25, 25),
-        })
         .with(Rectangle {
             width: size.x,
             height: size.y,
         })
-        .with(MenuButton)
         .with(Button::default())
         .with(Colored { color: color })
         .with(Renderable::new(true, layer as u32))

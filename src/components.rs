@@ -59,11 +59,7 @@ pub struct AnimationData {
 #[storage(NullStorage)]
 pub struct Background;
 
-#[derive(Clone, Debug, PartialEq, Component, Default)]
-#[storage(VecStorage)]
-pub struct Button {
-    pub hovered_over: bool,
-}
+
 
 
 ///Special struct that allows to change visibility of the entity entirely
@@ -105,7 +101,6 @@ pub fn register_components(world: &mut specs::World) {
     world.register::<Position>();
     world.register::<Sprite>();
     world.register::<Text>();
-    world.register::<Button>();
     world.register::<Colored>();
     world.register::<Rectangle>();
     world.register::<AnimationData>();
