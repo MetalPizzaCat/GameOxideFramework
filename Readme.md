@@ -15,7 +15,7 @@ Rust is iron oxide, but game is iron so game oxide.
 Because this depends on rust-sdl2 crate there is some additional work necessary before using this framework. See [Rust SDl2 requirements](https://github.com/Rust-SDL2/rust-sdl2/blob/master/README.md#sdl20-development-libraries)
 
 ## Branch info
-This is the master branch which contains latest changes and as such the least stable
+This is version of the framework as it was used for visual novel engine project where it was orignated. Exists for compatablity reasons. I advise against using this version
 
 ## Dependencies
 
