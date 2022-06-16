@@ -120,6 +120,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
 
 [[package]]
+name = "game-oxide-framework"
+version = "0.0.2"
+dependencies = [
+ "nalgebra",
+ "sdl2",
+ "serde",
+ "serde_json",
+ "specs",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -467,17 +478,6 @@ dependencies = [
  "num-traits",
  "paste",
  "wide",
-]
-
-[[package]]
-name = "simple_game_framework"
-version = "0.1.0"
-dependencies = [
- "nalgebra",
- "sdl2",
- "serde",
- "serde_json",
- "specs",
 ]
 
 [[package]]
