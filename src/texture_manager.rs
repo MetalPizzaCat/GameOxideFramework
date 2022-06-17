@@ -6,6 +6,8 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 
+///Texture manager holds all of the textures currently loaded.
+/// It is a layer on top of sdl2 TextureCreator that simplifies loading
 pub struct TextureManager<'a> {
     pub error_texture: sdl2::render::Texture<'a>,
     pub textures: HashMap<String, sdl2::render::Texture<'a>>,

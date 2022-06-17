@@ -31,11 +31,22 @@ pub fn render_textures(
         if !sprite.visible || !rend.visible || (game.active_layers & rend.layer == 0) {
             continue;
         }
+        let mut src_rect: Option<sdl2::rect::Rect> = None;
+
+        if let Some(src) = sprite.source_rect {
+            src_rect = Some(sdl2::rect::Rect::new(
+                src.x as i32,
+                src.y as i32,
+                src.z,
+                src.w,
+            ));
+        }
+        
         canvas.copy(
             texture_manager
                 .get(sprite.name.as_str())
                 .unwrap_or_else(|| &texture_manager.error_texture),
-            None,
+            src_rect,
             sdl2::rect::Rect::new(pos.x, pos.y, sprite.size.x, sprite.size.y),
         )?;
     }
