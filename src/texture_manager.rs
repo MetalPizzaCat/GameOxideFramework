@@ -1,4 +1,4 @@
-use nalgebra::Vector2;
+use nalgebra::{Vector2,Vector4};
 use sdl2::image::LoadTexture;
 use sdl2::pixels::PixelFormatEnum;
 use std::collections::HashMap;
@@ -10,9 +10,20 @@ use std::io::prelude::*;
 /// It is a layer on top of sdl2 TextureCreator that simplifies loading
 pub struct TextureManager<'a> {
     pub error_texture: sdl2::render::Texture<'a>,
-    pub textures: HashMap<String, sdl2::render::Texture<'a>>,
+    ///raw texture assets that were loaded
+    raw_textures: HashMap<String, sdl2::render::Texture<'a>>,
+    textures: HashMap<String, Texture>,
     pub text_textures: HashMap<&'a str, (Vector2<u32>, sdl2::render::Texture<'a>)>,
     pub creator: &'a sdl2::render::TextureCreator<sdl2::video::WindowContext>,
+}
+
+///Struct that holds information about specific
+pub struct Texture {
+    ///Name of the texture that was loaded
+    /// Maybe use id?
+    pub source_name: String,
+    ///Size of the loaded texture
+    pub source_rect: Vector4<u32>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -68,11 +79,17 @@ impl<'a> TextureManager<'a> {
         Ok(Self {
             error_texture: texture,
             textures: HashMap::new(),
+            raw_textures: HashMap::new(),
             text_textures: HashMap::new(),
             creator,
         })
     }
-    pub fn get(&'a self, name: &'a str) -> Option<&'a sdl2::render::Texture<'a>> {
+
+    pub fn get_raw(&'a self, name: &'a str) -> Option<&'a sdl2::render::Texture<'a>> {
+        return self.raw_textures.get(name);
+    }
+
+    pub fn get(&'a self, name: &'a str) -> Option<&'a Texture> {
         return self.textures.get(name);
     }
 
@@ -86,9 +103,12 @@ impl<'a> TextureManager<'a> {
         let data = String::from_utf8(buf).map_err(|e| e.to_string())?;
 
         let assets = serde_json::from_str::<Assets>(data.as_str()).map_err(|e| e.to_string())?;
-        for asset in assets.textures{
-            self.textures
-            .insert(asset.name.clone(), self.creator.load_texture(std::path::Path::new(asset.path.as_str()))?);
+        for asset in assets.textures {
+            self.raw_textures.insert(
+                asset.name.clone(),
+                self.creator
+                    .load_texture(std::path::Path::new(asset.path.as_str()))?,
+            );
         }
         Ok(())
     }
@@ -97,9 +117,33 @@ impl<'a> TextureManager<'a> {
         return self.text_textures.get(name);
     }
 
-    pub fn load(&mut self, name: String, path: String) -> Result<(), String> {
-        self.textures
-        .insert(name, self.creator.load_texture(std::path::Path::new(path.as_str()))?);
+    ///Loads new texture asset. If source texture is already present in the memory it will be used again.
+    /// 
+    /// src_rect: part of the texture that needs to be drawn
+    pub fn load(
+        &mut self,
+        
+        src_rect: Vector4<u32>,
+        name: String,
+        path: String,
+    ) -> Result<(), String> {
+        //first we need to check if texture is already present
+        if let Some(tex) = self.get_raw(name.as_str()) {
+            self.textures.insert(name,Texture{
+                source_name : path.clone(),
+                source_rect : src_rect
+            });
+        } else {
+            self.raw_textures.insert(
+                path.clone(),
+                self.creator
+                    .load_texture(std::path::Path::new(path.as_str()))?,
+            );
+            self.textures.insert(name,Texture{
+                source_name : path.clone(),
+                source_rect : src_rect
+            });
+        }
         Ok(())
     }
 

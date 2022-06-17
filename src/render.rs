@@ -20,7 +20,7 @@ pub type TextRender<'a> = (
 
 ///Function that only renders textures
 /// This relies on texture already being loaded into texture manager
-pub fn render_textures(
+pub fn render_sprites(
     canvas: &mut Canvas,
     texture_manager: &TextureManager,
     (pos, sprite, renderable): TexturedRenderData,
@@ -41,14 +41,27 @@ pub fn render_textures(
                 src.w,
             ));
         }
-        
-        canvas.copy(
-            texture_manager
-                .get(sprite.name.as_str())
-                .unwrap_or_else(|| &texture_manager.error_texture),
-            src_rect,
-            sdl2::rect::Rect::new(pos.x, pos.y, sprite.size.x, sprite.size.y),
-        )?;
+
+        if let Some(desc) = texture_manager.get(sprite.name.as_str()) {
+            canvas.copy(
+                texture_manager
+                    .get_raw(desc.source_name.as_str())
+                    .unwrap_or_else(|| &texture_manager.error_texture),
+                sdl2::rect::Rect::new(
+                    desc.source_rect.x as i32,
+                    desc.source_rect.y as i32,
+                    desc.source_rect.z,
+                    desc.source_rect.w,
+                ),
+                sdl2::rect::Rect::new(pos.x, pos.y, sprite.size.x, sprite.size.y),
+            )?;
+        } else {
+            canvas.copy(
+                &texture_manager.error_texture,
+                None,
+                sdl2::rect::Rect::new(pos.x, pos.y, sprite.size.x, sprite.size.y),
+            )?;
+        }
     }
     Ok(())
 }
@@ -141,5 +154,28 @@ pub fn render_text(
             ),
         )?;
     }
+    Ok(())
+}
+
+///Render everything to the screen
+pub fn render_game(
+    world: &World,
+    canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,
+    textures: &TextureManager,
+    game: &mut Game,
+    font: &sdl2::ttf::Font,
+) -> Result<(), String> {
+    canvas.set_draw_color(sdl2::pixels::Color::RGBA(0, 0, 0, 255));
+    canvas.clear();
+    render_fill(canvas, world.system_data(), game)?;
+    render_sprites(canvas, textures, world.system_data(), game)?;
+    render_text(
+        canvas,
+        font,
+        &canvas.texture_creator(),
+        world.system_data(),
+        game,
+    )?;
+    canvas.present();
     Ok(())
 }
