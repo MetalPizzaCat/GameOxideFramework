@@ -15,7 +15,11 @@ Rust is iron oxide, but game is iron so game oxide.
 Because this depends on rust-sdl2 crate there is some additional work necessary before using this framework. See [Rust SDl2 requirements](https://github.com/Rust-SDL2/rust-sdl2/blob/master/README.md#sdl20-development-libraries)
 
 ## Branch info
-This is the master branch which contains latest changes and as such the least stable
+This is the branch for version of the framework that was updated along side the project for remaking minesweeper in rust. [Minesweeper](https://github.com/MetalPizzaCat/minesweeper-ecs)
+### Differences
+* This version had minor fixes for issues that were caused by lousy copy pasting
+* This version has updated ui system which has minor convenience items for building buttons
+* This version has updated texture system that allows storing two textures based on one source texture file(to allow usage of atlas textures)
 
 ## Dependencies
 
